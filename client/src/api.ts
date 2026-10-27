@@ -42,3 +42,7 @@ export async function updateStatus(id: string | number, status: Status, appliedD
 }
 export async function createApplication(payload: Record<string, unknown>) { return normalizeApplication(await request('/api/applications', { method: 'POST', body: JSON.stringify(payload) })) }
 export async function createCompany(payload: Record<string, unknown>) { return normalizeCompany(await request('/api/companies', { method: 'POST', body: JSON.stringify(payload) })) }
+
+export async function deleteApplication(id: string | number) {
+  return request(`/api/applications/${id}`, { method: 'DELETE' })
+}

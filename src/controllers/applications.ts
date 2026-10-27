@@ -61,6 +61,11 @@ export async function updateApplicationStatus(request: Request, response: Respon
 }
 
 export async function deleteApplication(request: Request, response: Response) {
-  await prisma.application.delete({ where: { id: routeParam(request, "id") } });
-  response.status(204).send();
+  try {
+    await prisma.application.delete({ where: { id: routeParam(request, "id") } });
+    response.status(204).send();
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ error: "Internal server error" });
+  }
 }
