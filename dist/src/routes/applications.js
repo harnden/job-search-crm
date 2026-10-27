@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.applicationsRouter = void 0;
+const express_1 = require("express");
+const async_handler_js_1 = require("../lib/async-handler.js");
+const applications_js_1 = require("../controllers/applications.js");
+exports.applicationsRouter = (0, express_1.Router)();
+exports.applicationsRouter.get("/", (0, async_handler_js_1.asyncHandler)(applications_js_1.listApplications));
+exports.applicationsRouter.get("/:id", (0, async_handler_js_1.asyncHandler)(applications_js_1.getApplication));
+exports.applicationsRouter.post("/", (0, async_handler_js_1.asyncHandler)(applications_js_1.createApplication));
+exports.applicationsRouter.put("/:id", (0, async_handler_js_1.asyncHandler)(applications_js_1.updateApplication));
+exports.applicationsRouter.patch("/:id/status", (0, async_handler_js_1.asyncHandler)(applications_js_1.updateApplicationStatus));
+exports.applicationsRouter.delete("/:id", (0, async_handler_js_1.asyncHandler)(applications_js_1.deleteApplication));

@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.contactsRouter = void 0;
+const express_1 = require("express");
+const async_handler_js_1 = require("../lib/async-handler.js");
+const contacts_js_1 = require("../controllers/contacts.js");
+exports.contactsRouter = (0, express_1.Router)();
+exports.contactsRouter.get("/", (0, async_handler_js_1.asyncHandler)(contacts_js_1.listContacts));
+exports.contactsRouter.get("/:id", (0, async_handler_js_1.asyncHandler)(contacts_js_1.getContact));
+exports.contactsRouter.post("/", (0, async_handler_js_1.asyncHandler)(contacts_js_1.createContact));
+exports.contactsRouter.put("/:id", (0, async_handler_js_1.asyncHandler)(contacts_js_1.updateContact));
+exports.contactsRouter.delete("/:id", (0, async_handler_js_1.asyncHandler)(contacts_js_1.deleteContact));

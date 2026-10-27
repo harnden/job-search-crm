@@ -1,0 +1,30 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
+const cors_1 = __importDefault(require("cors"));
+const express_1 = __importDefault(require("express"));
+const helmet_1 = __importDefault(require("helmet"));
+const activities_js_1 = require("./routes/activities.js");
+const applications_js_1 = require("./routes/applications.js");
+const companies_js_1 = require("./routes/companies.js");
+const contacts_js_1 = require("./routes/contacts.js");
+const parser_js_1 = require("./routes/parser.js");
+const error_handler_js_1 = require("./middleware/error-handler.js");
+const not_found_js_1 = require("./middleware/not-found.js");
+exports.app = (0, express_1.default)();
+exports.app.use((0, cors_1.default)());
+exports.app.use((0, helmet_1.default)());
+exports.app.use(express_1.default.json());
+exports.app.get("/health", (_request, response) => {
+    response.json({ status: "ok" });
+});
+exports.app.use("/api/companies", companies_js_1.companiesRouter);
+exports.app.use("/api/contacts", contacts_js_1.contactsRouter);
+exports.app.use("/api/applications", applications_js_1.applicationsRouter);
+exports.app.use("/api/activities", activities_js_1.activitiesRouter);
+exports.app.use("/api/parser", parser_js_1.parserRouter);
+exports.app.use(not_found_js_1.notFoundHandler);
+exports.app.use(error_handler_js_1.errorHandler);

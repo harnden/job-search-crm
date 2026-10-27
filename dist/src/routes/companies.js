@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.companiesRouter = void 0;
+const express_1 = require("express");
+const async_handler_js_1 = require("../lib/async-handler.js");
+const companies_js_1 = require("../controllers/companies.js");
+exports.companiesRouter = (0, express_1.Router)();
+exports.companiesRouter.get("/", (0, async_handler_js_1.asyncHandler)(companies_js_1.listCompanies));
+exports.companiesRouter.get("/:id", (0, async_handler_js_1.asyncHandler)(companies_js_1.getCompany));
+exports.companiesRouter.post("/", (0, async_handler_js_1.asyncHandler)(companies_js_1.createCompany));
+exports.companiesRouter.put("/:id", (0, async_handler_js_1.asyncHandler)(companies_js_1.updateCompany));
+exports.companiesRouter.delete("/:id", (0, async_handler_js_1.asyncHandler)(companies_js_1.deleteCompany));
