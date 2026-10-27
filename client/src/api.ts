@@ -1,4 +1,4 @@
-import type { Application, Company, Status } from './types'
+import type { Application, ApplicationActionItem, Company, Status } from './types'
 
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
@@ -22,7 +22,11 @@ export function normalizeApplication(raw: unknown): Application {
   const item = (raw || {}) as Record<string, unknown>
   const company = item.company && typeof item.company === 'object' ? normalizeCompany(item.company) : normalizeCompany({ id: item.companyId, name: item.companyName || item.company })
   const status = text(item.status || item.applicationStatus, 'Identified') as Status
-  return { id: idValue(item.id ?? item._id, crypto.randomUUID()), title: text(item.title || item.jobTitle || item.position, 'Untitled role'), company, discoveredDate: text(item.discoveredDate || item.dateDiscovered || item.createdAt) || null, appliedDate: text(item.appliedDate || item.dateApplied) || null, salaryTarget: typeof (item.salaryTarget ?? item.salary ?? item.targetSalary) === 'string' || typeof (item.salaryTarget ?? item.salary ?? item.targetSalary) === 'number' ? item.salaryTarget as string | number : null, status, lastContactDate: text(item.lastContactDate || item.lastContact || item.contactedAt) || null, notes: text(item.notes), location: text(item.location) }
+  const actionItems = Array.isArray(item.actionItems) ? item.actionItems.map(rawAction => {
+    const action = (rawAction || {}) as Record<string, unknown>
+    return { id: text(action.id), title: text(action.title), completed: Boolean(action.completed) }
+  }) : []
+  return { id: idValue(item.id ?? item._id, crypto.randomUUID()), title: text(item.title || item.jobTitle || item.position, 'Untitled role'), company, discoveredDate: text(item.discoveredDate || item.dateDiscovered || item.createdAt) || null, appliedDate: text(item.appliedDate || item.dateApplied) || null, salaryTarget: typeof (item.salaryTarget ?? item.salary ?? item.targetSalary) === 'string' || typeof (item.salaryTarget ?? item.salary ?? item.targetSalary) === 'number' ? item.salaryTarget as string | number : null, status, lastContactDate: text(item.lastContactDate || item.lastContact || item.contactedAt) || null, notes: text(item.notes), actionItems, location: text(item.location) }
 }
 
 async function request(path: string, init?: RequestInit) {
@@ -45,4 +49,20 @@ export async function createCompany(payload: Record<string, unknown>) { return n
 
 export async function deleteApplication(id: string | number) {
   return request(`/api/applications/${id}`, { method: 'DELETE' })
+}
+
+export async function updateApplication(id: string | number, payload: Record<string, unknown>) {
+  await request(`/api/applications/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
+}
+
+export async function createApplicationActionItem(id: string | number, title: string): Promise<ApplicationActionItem> {
+  return request(`/api/applications/${id}/actions`, { method: 'POST', body: JSON.stringify({ title }) }) as Promise<ApplicationActionItem>
+}
+
+export async function updateApplicationActionItem(id: string | number, actionId: string, completed: boolean) {
+  await request(`/api/applications/${id}/actions/${actionId}`, { method: 'PATCH', body: JSON.stringify({ completed }) })
+}
+
+export async function deleteApplicationActionItem(id: string | number, actionId: string) {
+  await request(`/api/applications/${id}/actions/${actionId}`, { method: 'DELETE' })
 }

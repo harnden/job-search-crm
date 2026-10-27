@@ -41,6 +41,7 @@ const applicationPayloadSchema = z.object({
   location: z.string().trim().optional(),
   jobUrl: z.string().url().nullable().optional(),
   description: optionalNullableString,
+  notes: z.string().trim().nullable().optional(),
   salaryTarget: z.coerce.number().int().nonnegative().nullable().optional(),
   status: z.nativeEnum(ApplicationStatus),
   discoveredDate: optionalDate,
@@ -60,6 +61,7 @@ export const applicationUpdateSchema = z.object({
   jobTitle: z.string().trim().min(1).optional(),
   jobUrl: z.string().url().nullable().optional(),
   description: optionalNullableString,
+  notes: z.string().trim().nullable().optional(),
   salaryTarget: z.coerce.number().int().nonnegative().nullable().optional(),
   status: z.nativeEnum(ApplicationStatus).optional(),
   discoveredDate: optionalDate,
@@ -69,6 +71,14 @@ export const applicationUpdateSchema = z.object({
 export const applicationStatusSchema = z.object({
   status: z.nativeEnum(ApplicationStatus),
   appliedDate: optionalDate
+}).strict();
+
+export const applicationActionItemCreateSchema = z.object({
+  title: z.string().trim().min(1).max(120)
+}).strict();
+
+export const applicationActionItemUpdateSchema = z.object({
+  completed: z.boolean()
 }).strict();
 
 export const activityCreateSchema = z.object({

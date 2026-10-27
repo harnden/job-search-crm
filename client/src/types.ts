@@ -1,5 +1,6 @@
 export const STATUSES = ['Identified', 'Applied', 'Screening', 'Technical', 'Offer', 'Rejected', 'Ghosted'] as const
 export type Status = typeof STATUSES[number]
+export type ApplicationActionItem = { id: string; title: string; completed: boolean }
 
 export type Company = { id: string | number; name: string; logo?: string; industry?: string; location?: string }
 export type Application = {
@@ -12,5 +13,6 @@ export type Application = {
   status: Status
   lastContactDate?: string | null
   notes?: string
+  actionItems?: ApplicationActionItem[]
   location?: string
 }

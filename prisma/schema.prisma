@@ -69,6 +69,7 @@ model Application {
   jobTitle     String
   jobUrl       String?
   description  String?
+  notes        String?
   salaryTarget Int?
   status       ApplicationStatus
   discoveredDate DateTime?       @default(now())
@@ -77,11 +78,24 @@ model Application {
   updatedAt    DateTime          @updatedAt
   company      Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   activities   Activity[]
+  actionItems  ApplicationActionItem[]
 
   @@index([companyId])
   @@index([status])
   @@index([discoveredDate])
   @@index([appliedDate])
+}
+
+model ApplicationActionItem {
+  id            String      @id @default(uuid())
+  applicationId String
+  title         String
+  completed     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, completed])
 }
 
 model Activity {
