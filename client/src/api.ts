@@ -1,5 +1,7 @@
 import type { Application, Company, Status } from './types'
 
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+
 const unwrap = (value: unknown): unknown[] => {
   if (Array.isArray(value)) return value
   if (value && typeof value === 'object') {
@@ -24,7 +26,8 @@ export function normalizeApplication(raw: unknown): Application {
 }
 
 async function request(path: string, init?: RequestInit) {
-  const response = await fetch(path, { headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) }, ...init })
+  const url = `${API_BASE}${path}`
+  const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) }, ...init })
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
   return response.status === 204 ? null : response.json()
 }
