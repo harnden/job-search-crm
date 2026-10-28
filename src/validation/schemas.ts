@@ -38,7 +38,7 @@ const applicationPayloadSchema = z.object({
   jobTitle: z.string().trim().min(1).optional(),
   title: z.string().trim().min(1).optional(),
   companyName: z.string().trim().optional(),
-  location: z.string().trim().optional(),
+  location: z.string().trim().nullable().optional(),
   jobUrl: z.string().url().nullable().optional(),
   description: optionalNullableString,
   notes: z.string().trim().nullable().optional(),
@@ -59,6 +59,8 @@ export const applicationCreateSchema = applicationPayloadSchema
 export const applicationUpdateSchema = z.object({
   companyId: z.string().uuid().optional(),
   jobTitle: z.string().trim().min(1).optional(),
+  companyName: z.string().trim().min(1).optional(),
+  location: z.string().trim().nullable().optional(),
   jobUrl: z.string().url().nullable().optional(),
   description: optionalNullableString,
   notes: z.string().trim().nullable().optional(),

@@ -69,6 +69,7 @@ model Application {
   jobTitle     String
   jobUrl       String?
   description  String?
+  location     String?
   notes        String?
   salaryTarget Int?
   status       ApplicationStatus

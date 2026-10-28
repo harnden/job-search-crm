@@ -52,7 +52,7 @@ export async function deleteApplication(id: string | number) {
 }
 
 export async function updateApplication(id: string | number, payload: Record<string, unknown>) {
-  await request(`/api/applications/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
+  return normalizeApplication(await request(`/api/applications/${id}`, { method: 'PUT', body: JSON.stringify(payload) }))
 }
 
 export async function createApplicationActionItem(id: string | number, title: string): Promise<ApplicationActionItem> {

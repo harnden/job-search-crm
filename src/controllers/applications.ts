@@ -24,7 +24,7 @@ export async function getApplication(request: Request, response: Response) {
 
 export async function createApplication(request: Request, response: Response) {
   const data = applicationCreateSchema.parse(request.body);
-  const { companyName: _companyName, location: _location, title: _title, ...parsed } = data;
+  const { companyName: _companyName, title: _title, ...parsed } = data;
   const jobTitle = parsed.jobTitle || request.body.title;
   const companyId = parsed.companyId || request.body.companyId;
   if (!companyId) throw new ApiError(400, "companyId is required");
@@ -34,6 +34,7 @@ export async function createApplication(request: Request, response: Response) {
     data: {
       companyId,
       jobTitle,
+      location: parsed.location,
       status: parsed.status,
       jobUrl: parsed.jobUrl,
       description: parsed.description,
@@ -47,8 +48,20 @@ export async function createApplication(request: Request, response: Response) {
 }
 
 export async function updateApplication(request: Request, response: Response) {
-  const data = applicationUpdateSchema.parse(request.body);
-  const application = await prisma.application.update({ where: { id: routeParam(request, "id") }, data });
+  const { companyName, ...data } = applicationUpdateSchema.parse(request.body);
+  const id = routeParam(request, "id");
+  const application = await prisma.$transaction(async (transaction) => {
+    const existing = await transaction.application.findUnique({ where: { id }, select: { companyId: true } });
+    if (!existing) throw new ApiError(404, "Application not found");
+    if (companyName !== undefined) {
+      await transaction.company.update({ where: { id: existing.companyId }, data: { name: companyName } });
+    }
+    return transaction.application.update({
+      where: { id },
+      data,
+      include: { company: true, actionItems: { orderBy: { createdAt: "asc" } } }
+    });
+  });
   response.json(application);
 }
 
