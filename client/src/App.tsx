@@ -90,8 +90,8 @@ export default function App() {
       setEditingApplication(null)
       setToast('Application updated')
       return true
-    } catch {
-      setToast('Could not update application — is the API running?')
+    } catch (error) {
+      setToast(`Could not update: ${error instanceof Error ? error.message : 'Unexpected API error'}`)
       return false
     }
   }

@@ -2,6 +2,12 @@ import type { Application, ApplicationActionItem, Company, Status } from './type
 
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
+class ApiRequestError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message)
+  }
+}
+
 const unwrap = (value: unknown): unknown[] => {
   if (Array.isArray(value)) return value
   if (value && typeof value === 'object') {
@@ -32,7 +38,11 @@ export function normalizeApplication(raw: unknown): Application {
 async function request(path: string, init?: RequestInit) {
   const url = `${API_BASE}${path}`
   const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) }, ...init })
-  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
+  if (!response.ok) {
+    const body = await response.json().catch(() => null) as { error?: string; details?: Array<{ message?: string }> } | null
+    const detail = [body?.error, ...(body?.details || []).map(item => item.message).filter(Boolean)].filter(Boolean).join(': ')
+    throw new ApiRequestError(response.status, `${response.status} ${detail || response.statusText}`)
+  }
   return response.status === 204 ? null : response.json()
 }
 
@@ -52,7 +62,36 @@ export async function deleteApplication(id: string | number) {
 }
 
 export async function updateApplication(id: string | number, payload: Record<string, unknown>) {
-  return normalizeApplication(await request(`/api/applications/${id}`, { method: 'PUT', body: JSON.stringify(payload) }))
+  try {
+    return normalizeApplication(await request(`/api/applications/${id}`, { method: 'PUT', body: JSON.stringify(payload) }))
+  } catch (error) {
+    if (!(error instanceof ApiRequestError) || error.status !== 400) throw error
+  }
+
+  // Older deployed APIs don't yet accept companyName or location on application updates.
+  const current = normalizeApplication(await request(`/api/applications/${id}`))
+  const { companyName, location: _location, ...applicationPayload } = payload
+  const shouldRenameCompany = typeof companyName === 'string' && companyName.trim() !== current.company.name
+  if (shouldRenameCompany) {
+    await request(`/api/companies/${current.company.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name: companyName }),
+    })
+  }
+
+  try {
+    await request(`/api/applications/${id}`, { method: 'PUT', body: JSON.stringify(applicationPayload) })
+  } catch (error) {
+    if (shouldRenameCompany) {
+      await request(`/api/companies/${current.company.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ name: current.company.name }),
+      }).catch(() => undefined)
+    }
+    throw error
+  }
+
+  return normalizeApplication(await request(`/api/applications/${id}`))
 }
 
 export async function createApplicationActionItem(id: string | number, title: string): Promise<ApplicationActionItem> {
